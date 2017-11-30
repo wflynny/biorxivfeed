@@ -1,0 +1,12 @@
+#!/usr/bin/env python
+import argparse
+from biorxivfeed.feed import main, DEFAULT_CONF_PATH
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-c', '--conf', default=DEFAULT_CONF_PATH,
+                   help="path to configuration YAML file")
+parser.add_argument('-d', '--download', action='store_true',
+                   help="download pdfs if possible")
+parser.set_defaults(func=main)
+args = parser.parse_args()
+args.func(**vars(args))

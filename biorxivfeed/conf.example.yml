@@ -1,0 +1,19 @@
+# By default, the list of publications is stored in publist.yml and it is
+# intended to be manually curated.
+# `pubsdownloaddir` doesn't need to be specified as the default will just put
+# them in the same directory as `pubsfile`, but a different path will be
+# respected if specified.
+pubsfile: /path/to/papers/bioRxiv/publist.yml
+pubsdownloaddir: /path/to/download
+
+keywords:
+  - single cell
+  - clustering
+  - dimensionality reduction
+  - cell type
+  - cell type identification
+
+authors:
+  - Pe'er, Dana
+  - Nolan, Garry
+  - Robson, Paul
