@@ -1,12 +1,27 @@
 #!/usr/bin/env python
 import argparse
-from biorxivfeed.feed import main, DEFAULT_CONF_PATH
+from biorxivfeed.feed import scrape, remove, list_pubs, DEFAULT_CONF_PATH
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-c', '--conf', default=DEFAULT_CONF_PATH,
+parent = argparse.ArgumentParser(add_help=False)
+parent.add_argument('-c', '--conf', default=DEFAULT_CONF_PATH,
                    help="path to configuration YAML file")
-parser.add_argument('-d', '--download', action='store_true',
+
+parser = argparse.ArgumentParser(parents=[parent])
+subparsers = parser.add_subparsers(dest='command')
+subparsers.required = True
+
+scrape_parser = subparsers.add_parser('scrape', help="scrape bioRxiv")
+scrape_parser.add_argument('-d', '--download', action='store_true',
                    help="download pdfs if possible")
-parser.set_defaults(func=main)
+scrape_parser.set_defaults(func=scrape)
+
+manage_parser = subparsers.add_parser('remove', help="clean publist")
+manage_parser.add_argument('dois', nargs='*',
+                           help="remove pub from publist and blacklist it")
+manage_parser.set_defaults(func=remove)
+
+list_parser = subparsers.add_parser('list', help="list pubs in publist")
+list_parser.set_defaults(func=list_pubs)
+
 args = parser.parse_args()
 args.func(**vars(args))
