@@ -3,9 +3,8 @@ import os
 import sys
 import yaml
 import subprocess
-from itertools import filterfalse
 
-from .utils import adjust_auth
+from .utils import adjust_auth, partition
 
 PDF_URL_FMT = ('https://www.biorxiv.org/content/biorxiv/early/'
                '{date[0]}/{date[1]}/{date[2]}/{doi}.full.pdf')
@@ -100,16 +99,19 @@ class PubsList(object):
             yaml.dump(self.blacklist, fout, default_flow_style=False)
 
     def blacklist_doi(self, doi:str) -> None:
+        if doi in self.blacklist:
+            print(f"doi {doi} already blacklisted", file=sys.stderr)
+            return
         self.blacklist.add(doi)
         self.export([])
         print(f"Successfully added {doi} to blacklist")
 
     def remove_pdf(self, pub_dict:dict) -> None:
-        pdfname = pub_dict['doi'].split('.', 1)[1] + '.full.pdf'
+        pdfname = pub_dict['doi'].split('/', 1)[1] + '.full.pdf'
         pdfpath = os.path.join(self.download_dir, pdfname)
         if os.path.exists(pdfpath):
             os.remove(pdfpath)
-            print(f"Removed pdf for pub with doi: {pub_dict[doi]}")
+            print(f"Removed pdf for pub with doi: {pub_dict['doi']}")
 
     def parse_publist(self) -> list:
         with open(self.pubs_file, 'r') as fin:
@@ -132,12 +134,14 @@ class PubsList(object):
         fmt = 
         -
         """
-        new_pubs = list(filterfalse(self.check_publist, new_pubs))
-
         existing = self.parse_publist()
-        pubs = list(filterfalse(self.check_blacklist, existing + new_pubs))
+        _, new_pubs = partition(self.check_publist, new_pubs)
+
+        current_pubs = existing + new_pubs
+        blacklisted, filtered = partition(self.check_blacklist, current_pubs)
+
         with open(self.pubs_file, 'w+') as fout:
-            yaml.dump_all(pubs, fout, explicit_start=True,
+            yaml.dump_all(filtered, fout, explicit_start=True,
                           default_flow_style=False)
 
         if download:
@@ -145,17 +149,17 @@ class PubsList(object):
                 if not self.check_blacklist(pub):
                     self.download_pub(pub)
 
-        for pub in pubs:
-            if self.check_blacklist(pub):
-                self.remove_pdf(pub)
+        for pub in blacklisted:
+            self.remove_pdf(pub)
 
         self.write_blacklist()
 
     def download_pub(self, pub:dict):
         try:
             subprocess.check_call(['wget', '-P', self.download_dir,
-                                   pub['pdflink'],
-                                   '>', '/dev/null'])
+                                   pub['pdflink']],
+                                  stdout=subprocess.DEVNULL,
+                                  stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError:
             print("Failed to download pdf: %s"%pub['pdflink'], file=sys.stderr)
 

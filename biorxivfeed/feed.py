@@ -1,10 +1,11 @@
 import os
+import sys
 import feedparser
 
 from .conf import ConfigParser
 from .pubslist import Entry, PubsList
 
-from .utils import validate_doi
+from .utils import standardize_doi_list
 
 DEFAULT_CONF_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                  'conf.example.yml')
@@ -38,13 +39,17 @@ def scrape(**kwargs) -> None:
 
 def remove(**kwargs) -> None:
     dois = kwargs.get('dois')
-    for doi in dois:
-        if not validate_doi(doi):
-            raise Exception("doi %s not a valid bioRxiv doi", doi)
+
+    accepted_dois, rejected_dois = standardize_doi_list(dois)
+    if rejected_dois:
+        for reject in rejected_dois:
+            print("doi %s not a valid bioRxiv doi"%rejected, file=sys.stderr)
+        if not accepted_dois:
+            sys.exit("No valid dois to process!")
 
     configs, pubslist = preload(kwargs.get('conf')) 
 
-    for doi in dois:
+    for doi in accepted_dois:
         pubslist.blacklist_doi(doi)
 
 def list_pubs(**kwargs) -> None:
