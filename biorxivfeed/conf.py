@@ -14,6 +14,7 @@ class ConfigParser(object):
         pubsfile = conf.get('pubsfile')
         download_dir = conf.get('pubsdownloaddir', None)
         blacklist = conf.get('blacklist', None)
+        pubs_cmd = conf.get('pubs_cmd_prefix', None)
 
         authors = list(map(adjust_auth, authors))
 
@@ -22,3 +23,4 @@ class ConfigParser(object):
         self.pubs_file = pubsfile
         self.download_dir = download_dir
         self.blacklist_file = blacklist
+        self.pubs_cmd_prefix = pubs_cmd

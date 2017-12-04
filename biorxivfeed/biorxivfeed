@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import argparse
-from biorxivfeed.feed import scrape, remove, list_pubs, DEFAULT_CONF_PATH
+from biorxivfeed.feed import scrape, remove, list_pubs, add_to_pubs, \
+                             DEFAULT_CONF_PATH
 
 parent = argparse.ArgumentParser(add_help=False)
 parent.add_argument('-c', '--conf', default=DEFAULT_CONF_PATH,
@@ -22,6 +23,12 @@ manage_parser.set_defaults(func=remove)
 
 list_parser = subparsers.add_parser('list', help="list pubs in publist")
 list_parser.set_defaults(func=list_pubs)
+
+pubs_parser = subparsers.add_parser('pubs', help="add pub to `pubs` repo")
+pubs_parser.add_argument('doi', help="doi of pub to add")
+pubs_parser.add_argument('-t', '--tags', help="`pubs` tags")
+pubs_parser.add_argument('-M', '--move', action='store_true', help="move pdf")
+pubs_parser.set_defaults(func=add_to_pubs)
 
 args = parser.parse_args()
 args.func(**vars(args))

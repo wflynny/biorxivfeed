@@ -5,7 +5,7 @@ import feedparser
 from .conf import ConfigParser
 from .pubslist import Entry, PubsList
 
-from .utils import standardize_doi_list
+from .utils import *
 
 DEFAULT_CONF_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                  'conf.example.yml')
@@ -56,3 +56,17 @@ def list_pubs(**kwargs) -> None:
     configs, pubslist = preload(kwargs.get('conf')) 
 
     pubslist.list_pubs()
+
+def add_to_pubs(**kwargs) -> None:
+    configs, pubslist = preload(kwargs.get('conf'))
+
+    doi = kwargs.get('doi')
+    doi = standardize_doi(doi)
+    if not doi:
+        print(f"doi {doi} isn't valid!", file=sys.stderr)
+        sys.exit(2)
+
+    prefix = configs.pubs_cmd_prefix
+    tags = kwargs.get('tags', None)
+    move = kwargs.get('move', False)
+    pubslist.call_pubs_add(prefix, doi, tags, move=move)

@@ -106,9 +106,12 @@ class PubsList(object):
         self.export([])
         print(f"Successfully added {doi} to blacklist")
 
+    def get_pdf_path(self, doi:str) -> None:
+        pdfname = doi.split('/', 1)[1] + '.full.pdf'
+        return os.path.join(self.download_dir, pdfname)
+
     def remove_pdf(self, pub_dict:dict) -> None:
-        pdfname = pub_dict['doi'].split('/', 1)[1] + '.full.pdf'
-        pdfpath = os.path.join(self.download_dir, pdfname)
+        pdfpath = self.get_pdf_path(pub_dict['doi'])
         if os.path.exists(pdfpath):
             os.remove(pdfpath)
             print(f"Removed pdf for pub with doi: {pub_dict['doi']}")
@@ -168,3 +171,32 @@ class PubsList(object):
         for pub in pubs:
             print(' | '.join((pub['doi'], pub['date'], pub['authors'][0], 
                               pub['title'])))
+
+    def call_pubs_add(self, pubs_cmd_prefix, doi, tags, move=True):
+        prefix = ['/bin/bash', '-i', '-c']
+        cmd = []
+        if pubs_cmd_prefix:
+            cmd += pubs_cmd_prefix.split(' ')
+            cmd.append('&&')
+
+        existing = self.parse_publist()
+        for pub in existing:
+            if pub['doi'] == doi:
+                break
+        else:
+            print(f"doi {doi} doesn't exist! Exiting", file=sys.stderr)
+            exit(2)
+
+        cmd += ['pubs', 'add', '-D', doi]
+        pdfpath = self.get_pdf_path(doi)
+        if os.path.exists(pdfpath):
+            cmd += ['-d', pdfpath]
+        if move:
+            cmd += ['-M']
+        if tags:
+            cmd += ['-t', tags]
+
+        res = subprocess.check_output(prefix + [' '.join(cmd)])
+        print(res.stdout)
+
+        self.blacklist_doi(doi)
