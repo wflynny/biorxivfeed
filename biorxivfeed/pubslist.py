@@ -169,8 +169,9 @@ class PubsList(object):
     def list_pubs(self):
         pubs = self.parse_publist()
         for pub in pubs:
-            print(' | '.join((pub['doi'], pub['date'], pub['authors'][0], 
-                              pub['title'])))
+            print(' | '.join((pub['doi'], pub['date'],
+                              ','.join(pub['people'] + pub['keywords']),
+                              pub['authors'][0], pub['title'])))
 
     def call_pubs_add(self, pubs_cmd_prefix, doi, tags, move=True):
         prefix = ['/bin/bash', '-i', '-c']
@@ -197,6 +198,6 @@ class PubsList(object):
             cmd += ['-t', tags]
 
         res = subprocess.check_output(prefix + [' '.join(cmd)])
-        print(res.stdout)
+        print(res.decode('ascii'))
 
         self.blacklist_doi(doi)
