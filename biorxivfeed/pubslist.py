@@ -5,6 +5,7 @@ import yaml
 import subprocess
 
 from .utils import adjust_auth, partition
+from .color import dye_out
 
 PDF_URL_FMT = ('https://www.biorxiv.org/content/biorxiv/early/'
                '{date[0]}/{date[1]}/{date[2]}/{doi}.full.pdf')
@@ -172,6 +173,19 @@ class PubsList(object):
             print(' | '.join((pub['doi'], pub['date'],
                               ','.join(pub['people'] + pub['keywords']),
                               pub['authors'][0], pub['title'])))
+
+    def list_pubs_fancy(self):
+        pubs = self.parse_publist()
+        for pub in pubs:
+            doi = dye_out(pub['doi'], 'green')
+            date = dye_out(pub['date'], 'white')
+            kws = ', '.join(pub['people'] + pub['keywords'])
+            kws = dye_out("KEYWORDS: " + kws, 'brightyellow')
+            auth = dye_out(pub['authors'][0].strip() + ' et al.', 'bwhite')
+            title = dye_out(pub['title'].strip(), 'white')
+            print('* ' + ' | '.join((date, doi, kws)))
+            print('  '.join(('', auth, title)))
+            print()
 
     def call_pubs_add(self, pubs_cmd_prefix, doi, tags, move=True):
         prefix = ['/bin/bash', '-i', '-c']

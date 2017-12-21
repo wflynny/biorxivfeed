@@ -54,8 +54,12 @@ def remove(**kwargs) -> None:
 
 def list_pubs(**kwargs) -> None:
     configs, pubslist = preload(kwargs.get('conf')) 
+    fancy = kwargs.get('fancy', False)
 
-    pubslist.list_pubs()
+    if fancy:
+        pubslist.list_pubs_fancy()
+    else:
+        pubslist.list_pubs()
 
 def add_to_pubs(**kwargs) -> None:
     configs, pubslist = preload(kwargs.get('conf'))

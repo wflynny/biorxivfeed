@@ -22,6 +22,8 @@ manage_parser.add_argument('dois', nargs='*',
 manage_parser.set_defaults(func=remove)
 
 list_parser = subparsers.add_parser('list', help="list pubs in publist")
+list_parser.add_argument('-f', '--fancy', action='store_true',
+                         help="print in color on 2 lines")
 list_parser.set_defaults(func=list_pubs)
 
 pubs_parser = subparsers.add_parser('pubs', help="add pub to `pubs` repo")
