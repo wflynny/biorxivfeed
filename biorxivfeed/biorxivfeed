@@ -24,6 +24,10 @@ manage_parser.set_defaults(func=remove)
 list_parser = subparsers.add_parser('list', help="list pubs in publist")
 list_parser.add_argument('-f', '--fancy', action='store_true',
                          help="print in color on 2 lines")
+sorters = list_parser.add_mutually_exclusive_group()
+sorters.add_argument('-a', '--author-sort', action='store_true')
+sorters.add_argument('-d', '--doi-sort', action='store_true')
+sorters.add_argument('-t', '--date-sort', action='store_true')
 list_parser.set_defaults(func=list_pubs)
 
 pubs_parser = subparsers.add_parser('pubs', help="add pub to `pubs` repo")

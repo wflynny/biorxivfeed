@@ -56,10 +56,15 @@ def list_pubs(**kwargs) -> None:
     configs, pubslist = preload(kwargs.get('conf')) 
     fancy = kwargs.get('fancy', False)
 
+    sortway = None
+    if kwargs.get('date_sort'): sortway = 'date'
+    elif kwargs.get('doi_sort'): sortway = 'doi'
+    elif kwargs.get('author_sort'): sortway = 'auth'
+
     if fancy:
-        pubslist.list_pubs_fancy()
+        pubslist.list_pubs_fancy(sortway)
     else:
-        pubslist.list_pubs()
+        pubslist.list_pubs(sortway)
 
 def add_to_pubs(**kwargs) -> None:
     configs, pubslist = preload(kwargs.get('conf'))

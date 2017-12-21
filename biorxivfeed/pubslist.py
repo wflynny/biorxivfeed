@@ -167,15 +167,28 @@ class PubsList(object):
         except subprocess.CalledProcessError:
             print("Failed to download pdf: %s"%pub['pdflink'], file=sys.stderr)
 
-    def list_pubs(self):
+    @staticmethod
+    def _sort_pubs(items, way='date'):
+        ways = dict(date=lambda p: p['date'],
+                    auth=lambda p: p['authors'][0].split()[0],
+                    doi=lambda p: p['doi'])
+        return sorted(items, key=ways.get(way, None))
+
+    def list_pubs(self, sortway=None):
         pubs = self.parse_publist()
+        if sortway:
+            pubs = PubsList._sort_pubs(pubs, sortway)
+
         for pub in pubs:
             print(' | '.join((pub['doi'], pub['date'],
                               ','.join(pub['people'] + pub['keywords']),
                               pub['authors'][0], pub['title'])))
 
-    def list_pubs_fancy(self):
+    def list_pubs_fancy(self, sortway=None):
         pubs = self.parse_publist()
+        if sortway:
+            pubs = PubsList._sort_pubs(pubs, sortway)
+
         for pub in pubs:
             doi = dye_out(pub['doi'], 'green')
             date = dye_out(pub['date'], 'white')
