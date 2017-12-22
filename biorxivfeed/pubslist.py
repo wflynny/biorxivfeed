@@ -159,7 +159,7 @@ class PubsList(object):
 
         if update:
             for pub in current_pubs:
-                if not self.check_pdf_exists(pub)
+                if not self.check_pdf_exists(pub):
                     self.download_pub(pub)
 
         for pub in blacklisted:
