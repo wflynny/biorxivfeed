@@ -4,7 +4,7 @@ import sys
 import yaml
 import subprocess
 
-from .utils import adjust_auth, partition
+from .utils import adjust_auth, partition, date_fudge
 from .color import dye_out
 
 PDF_URL_FMT = ('https://www.biorxiv.org/content/biorxiv/early/'
@@ -158,14 +158,30 @@ class PubsList(object):
 
         self.write_blacklist()
 
+    def _download(self, link):
+        subprocess.check_call(['wget', '-P', self.download_dir, link],
+                              stdout=subprocess.DEVNULL,
+                              stderr=subprocess.STDOUT)
+
     def download_pub(self, pub:dict):
         try:
-            subprocess.check_call(['wget', '-P', self.download_dir,
-                                   pub['pdflink']],
-                                  stdout=subprocess.DEVNULL,
-                                  stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError:
-            print("Failed to download pdf: %s"%pub['pdflink'], file=sys.stderr)
+            self._download(pub['pdflink'])
+        except subprocess.CalledProcessError as e:
+            # hack because biorxiv doesn't put pdflinks in RSS feed and the
+            # dates don't match always
+            # try going back 2 days
+            for date in date_fudge(pub['date'], 2):
+                try: 
+                    new_link = PDF_URL_FMT.format(date=date.split('-'),
+                                                  doi=pub['doi'].split('/',1)[1])
+                    self._download(new_link)
+                    pub['pdflink'] = new_link
+                    break
+                except subprocess.CalledProcessError:
+                    pass
+            else:
+                print("Failed to download pdf: %s"%pub['pdflink'], file=sys.stderr)
+                raise e
 
     @staticmethod
     def _sort_pubs(items, way='date'):

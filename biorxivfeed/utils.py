@@ -1,4 +1,5 @@
 import re
+from datetime import datetime, timedelta
 from itertools import tee, filterfalse
 
 DOI_PREFIX = '10.1101'
@@ -43,3 +44,9 @@ def partition(predicate, iterable):
         predicate = bool
     t1, t2 = tee(iterable)
     return list(filter(predicate, t1)), list(filterfalse(predicate, t2))
+
+def date_fudge(date_str, ndays):
+    fmt = '%Y-%m-%d'
+    curr_date = datetime.strptime(date_str, fmt)
+    return [(curr_date - timedelta(days=i)).strftime(fmt)
+            for i in range(1, ndays+1)]
