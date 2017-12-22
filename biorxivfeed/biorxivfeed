@@ -14,6 +14,8 @@ subparsers.required = True
 scrape_parser = subparsers.add_parser('scrape', help="scrape bioRxiv")
 scrape_parser.add_argument('-d', '--download', action='store_true',
                    help="download pdfs if possible")
+scrape_parser.add_argument('-u', '--update', action='store_true',
+                   help="update existing pubs (redownload pdfs, etc)")
 scrape_parser.set_defaults(func=scrape)
 
 manage_parser = subparsers.add_parser('remove', help="clean publist")

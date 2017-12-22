@@ -117,6 +117,10 @@ class PubsList(object):
             os.remove(pdfpath)
             print(f"Removed pdf for pub with doi: {pub_dict['doi']}")
 
+    def check_pdf_exists(self, pub_dict:dict) -> None:
+        pdfpath = self.get_pdf_path(pub_dict['doi'])
+        return os.path.exists(pdfpath)
+
     def parse_publist(self) -> list:
         with open(self.pubs_file, 'r') as fin:
             return list(yaml.load_all(fin))
@@ -151,6 +155,11 @@ class PubsList(object):
         if download:
             for pub in new_pubs:
                 if not self.check_blacklist(pub):
+                    self.download_pub(pub)
+
+        if update:
+            for pub in current_pubs:
+                if not self.check_pdf_exists(pub)
                     self.download_pub(pub)
 
         for pub in blacklisted:
