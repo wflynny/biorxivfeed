@@ -35,7 +35,8 @@ def scrape(**kwargs) -> None:
             new_pubs.append(entry.export())
 
     if new_pubs:
-        pubslist.export(new_pubs, download=kwargs.get('download', False))
+        pubslist.export(new_pubs, download=kwargs.get('download', False),
+                        update=kwargs.get('update', False))
 
 def remove(**kwargs) -> None:
     dois = kwargs.get('dois')

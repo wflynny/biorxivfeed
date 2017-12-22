@@ -137,7 +137,7 @@ class PubsList(object):
                 return True
         return False
 
-    def export(self, new_pubs:list, download=False) -> None:
+    def export(self, new_pubs:list, download=False, update=False) -> None:
         """
         fmt = 
         -
