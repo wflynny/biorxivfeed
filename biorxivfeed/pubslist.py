@@ -37,6 +37,11 @@ class Entry(object):
         self.link = self.raw.get('link', '')
 
         authors = [d['name'].replace('.', '') for d in self.raw.get('authors')]
+        # authors list may not be complete if there are many authors due to
+        # limits of RSS feed. quick sanity check here (authors can be cut off
+        # mid first/last name.  If it has a comma in it, we can at least expect
+        # it to have the last name correct
+        authors = list(filter(lambda a: ',' in a, authors))
         self.authors = list(map(adjust_auth, authors))
 
         self.pdflink = PDF_URL_FMT.format(date=self.date.split('-'),

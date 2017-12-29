@@ -1,4 +1,5 @@
 import re
+import sys
 from datetime import datetime, timedelta
 from itertools import tee, filterfalse
 
@@ -33,6 +34,8 @@ def validate_doi(doi):
     return False
 
 def adjust_auth(a):
+    if ',' not in a:
+        print(f'weird author name: {a}', file=sys.stderr)
     last, first = map(str.strip, a.split(','))
     first = first.strip(',.')
     if len(first) > 1: first = first[0]
