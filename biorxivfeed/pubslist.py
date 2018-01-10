@@ -36,7 +36,8 @@ class Entry(object):
         self.doi = doi
         self.link = self.raw.get('link', '')
 
-        authors = [d['name'].replace('.', '') for d in self.raw.get('authors')]
+        # sometimes the authors list even has empty name dictionaries 2018/01/09
+        authors = [d['name'].replace('.', '') for d in self.raw.get('authors') if d]
         # authors list may not be complete if there are many authors due to
         # limits of RSS feed. quick sanity check here (authors can be cut off
         # mid first/last name.  If it has a comma in it, we can at least expect
@@ -173,9 +174,19 @@ class PubsList(object):
         self.write_blacklist()
 
     def _download(self, link):
-        subprocess.check_call(['wget', '-P', self.download_dir, link],
-                              stdout=subprocess.DEVNULL,
-                              stderr=subprocess.STDOUT)
+        cmd = ['wget', '-P', self.download_dir, link]
+        with subprocess.Popen(cmd, stdout=subprocess.DEVNULL,
+                              stderr=subprocess.STDOUT,
+                              preexec_fn=os.setsid) as process:
+            try:
+                output = process.communicate(timeout=30)
+            except TimeoutExpired:
+                os.killpg(process.pid, signal.SIGINT)
+                output = process.communicate()
+                print("Downloading timed out with output: %s, %s"%output, file=sys.stderr)
+        #subprocess.check_call(['wget', '-P', self.download_dir, link],
+        #                      stdout=subprocess.DEVNULL,
+        #                      stderr=subprocess.STDOUT, timeout=30)
 
     def download_pub(self, pub:dict):
         try:
