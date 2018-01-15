@@ -174,7 +174,9 @@ class PubsList(object):
         self.write_blacklist()
 
     def _download(self, link):
-        cmd = ['wget', '-P', self.download_dir, link]
+        # added -t N -> number of times to retry
+        # added -T N -> N seconds until timeout
+        cmd = ['wget', '-t', '1', '-T', '30', '-P', self.download_dir, link]
         with subprocess.Popen(cmd, stdout=subprocess.DEVNULL,
                               stderr=subprocess.STDOUT,
                               preexec_fn=os.setsid) as process:
